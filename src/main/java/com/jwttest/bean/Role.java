@@ -1,4 +1,4 @@
-package com.jwttest.user;
+package com.jwttest.bean;
 
 public enum Role {
 
