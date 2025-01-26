@@ -40,12 +40,8 @@ public class User implements UserDetails{
     @Column(name = "EMAIL", nullable = false)
     private String email;
 
-    @Column(name = "PHONE", nullable = false)
-    private String phone;
-
     @Enumerated(EnumType.STRING)
     private Role role;
-
 
 
     //USER DETAILS METHODS
