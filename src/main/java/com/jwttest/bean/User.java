@@ -11,6 +11,7 @@ import java.util.Collection;
 import java.util.List;
 
 
+
 @Getter
 @Setter
 @AllArgsConstructor
@@ -19,55 +20,72 @@ import java.util.List;
 @EqualsAndHashCode
 @Builder
 @Entity
-@Table(name = "users")
-public class User implements UserDetails{
+@Table(name = "USERS")
+public class User implements UserDetails {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY) // Ensure auto-generation for the ID
     private Long id;
 
     @Column(name = "FIRST_NAME", nullable = false)
     private String firstName;
 
-    @Column(name = "LASET_NAME", nullable = false)
+    @Column(name = "LAST_NAME", nullable = false)
     private String lastName;
 
-    @Column(name = "USERNAME", nullable = false)
+    @Column(name = "USERNAME", nullable = false, unique = true)
     private String username;
 
     @Column(name = "PASSWORD", nullable = false)
     private String password;
 
-    @Column(name = "EMAIL", nullable = false)
+    @Column(name = "EMAIL", nullable = false, unique = true)
     private String email;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "ROLE", nullable = false)
     private Role role;
 
-
-    //USER DETAILS METHODS
+    // USER DETAILS METHODS
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
+        // Convert the role to a GrantedAuthority
         return List.of(new SimpleGrantedAuthority(role.name()));
     }
 
     @Override
     public boolean isAccountNonExpired() {
-        return UserDetails.super.isAccountNonExpired();
+        // Define your logic; for now, return true (always valid)
+        return true;
     }
 
     @Override
     public boolean isAccountNonLocked() {
-        return UserDetails.super.isAccountNonLocked();
+        // Define your logic; for now, return true (always valid)
+        return true;
     }
 
     @Override
     public boolean isCredentialsNonExpired() {
-        return UserDetails.super.isCredentialsNonExpired();
+        // Define your logic; for now, return true (always valid)
+        return true;
     }
 
     @Override
     public boolean isEnabled() {
-        return UserDetails.super.isEnabled();
+        // Define your logic; for now, return true (always enabled)
+        return true;
+    }
+
+    @Override
+    public String getUsername() {
+        return username;
+    }
+
+    @Override
+    public String getPassword() {
+        return password;
     }
 }
+

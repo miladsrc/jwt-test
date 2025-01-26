@@ -36,7 +36,7 @@ public class JwtAuthenticationFilter extends GenericFilterBean {
 
         String authorizationHeader = httpRequest.getHeader("Authorization");
 
-        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
             chain.doFilter(request, response);
             return;
         }
