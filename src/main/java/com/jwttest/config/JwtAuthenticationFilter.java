@@ -12,6 +12,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.GenericFilterBean;
 
@@ -23,6 +25,7 @@ import java.util.ArrayList;
 public class JwtAuthenticationFilter extends GenericFilterBean {
 
     private final JwtService jwtService;
+    private final UserDetailsService userDetailsService;
 
     @Override
     public void doFilter(@NonNull ServletRequest request,
@@ -39,9 +42,13 @@ public class JwtAuthenticationFilter extends GenericFilterBean {
             return;
         }
 
-            String token = authorizationHeader.substring(7); // حذف "Bearer "
-            final String userEmail = jwtService.extractUsername(token);
+        assert authorizationHeader != null;
+        String token = authorizationHeader.substring(7); // حذف "Bearer "
+        final String userEmail = jwtService.extractUsername(token);
 
+        if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
+        }
 
 
 //            try {
