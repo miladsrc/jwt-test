@@ -10,15 +10,14 @@ import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.GenericFilterBean;
 
 import java.io.IOException;
-import java.util.ArrayList;
 
 @Component
 @RequiredArgsConstructor
@@ -43,28 +42,24 @@ public class JwtAuthenticationFilter extends GenericFilterBean {
         }
 
         assert authorizationHeader != null;
-        String token = authorizationHeader.substring(7); // حذف "Bearer "
+        String token = authorizationHeader.substring(7); // delete "Bearer "
         final String userEmail = jwtService.extractUsername(token);
 
         if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
+            if (jwtService.isTokenValid(token, userDetails)) {
+                UsernamePasswordAuthenticationToken authToken =
+                        new UsernamePasswordAuthenticationToken(
+                                userDetails,
+                                null,// we dont have credentials
+                                userDetails.getAuthorities()
+                        );
+                authToken.setDetails(
+                        new WebAuthenticationDetailsSource().buildDetails(httpRequest)
+                );
+                SecurityContextHolder.getContext().setAuthentication(authToken);
+            }
         }
-
-
-//            try {
-//                // اعتبارسنجی توکن (مثلاً با استفاده از JwtUtils یا JwtTokenProvider)
-//                Claims claims = Jwt.validateToken(token);
-//
-//                // ایجاد Authentication در SecurityContext
-//                Authentication authentication = new UsernamePasswordAuthenticationToken(
-//                        claims.getSubject(), null, new ArrayList<>() // اختیاری: اضافه کردن نقش‌ها
-//                );
-//                SecurityContextHolder.getContext().setAuthentication(authentication);
-//
-//            } catch (JwtException ex) {
-//                httpResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid JWT Token");
-//                return;
-//            }
+        doFilter(httpRequest, httpResponse, chain);
     }
-
 }
